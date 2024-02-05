@@ -33,6 +33,7 @@ const NotesDashboard = () => {
     editNote: false as boolean,
     deletModal: false as boolean,
     noteId: "" as string,
+    
   });
 
   const getColor = notesFields.label?.color;
@@ -105,6 +106,8 @@ const NotesDashboard = () => {
       }));
     }
   };
+  
+  
   const handleEditNote = (note: Notedata) => {
     setNotesFields((prevData) => ({ ...prevData, selectedNote: note }));
     handleIconClick();
