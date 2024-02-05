@@ -1,0 +1,264 @@
+import { useState, useEffect } from "react";
+import Header from "./Header";
+import TextEditor from "./TextEditor";
+import LabelDropdown from "./LabelDropdown";
+import { Container, Row, Col, Form, Button, Card, Modal } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPlus,
+  faMagnifyingGlass,
+  faTrash,
+  faArrowTrendUp,
+  faTrashCan
+} from "@fortawesome/free-solid-svg-icons";
+import { FormValues, ColorLable, colorOptions, Notedata } from "../interface/Interfaces";
+import DeleteModal from "./DeleteModal";
+
+const NotesDashboard = () => {
+  const [noteData, setNoteData] = useState({
+    title: "Title",
+    changeInput: false,
+    label: {},
+    noteText: "",
+    notes: [],
+    showEditor: false,
+    searchNote: "",
+    selectedNote: null,
+    editNote: false,
+    deleteModal: false,
+    noteId: "",
+  });
+
+  const user = sessionStorage.getItem("loginUser");
+  let userFullName = "";
+  let getName = "";
+  if (user) {
+    const getUser: FormValues = JSON.parse(user);
+    userFullName = `${getUser.firstName} ${getUser.lastName}`;
+    getName = `${getUser.firstName?.charAt(0).toUpperCase()}${getUser.lastName?.charAt(0).toUpperCase()}`;
+  }
+
+  const currDate = new Date().toLocaleDateString();
+  const currTime = new Date().toLocaleTimeString();
+
+  const getNotesData = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/notes");
+      const getNotes = await response.json();
+      const filteredNotes = getNotes.filter((item: Notedata) =>
+        item.title?.toLowerCase().includes(noteData.searchNote.toLowerCase())
+      );
+      setNoteData((prevData) => ({ ...prevData, notes: filteredNotes }));
+    } catch (error) {
+      console.log(error, "getting error while fetching data");
+    }
+  };
+
+  useEffect(() => {
+    getNotesData();
+  }, [noteData.searchNote]);
+
+  const handleChangeInput = (e: any) => {
+    setNoteData((prevData) => ({
+      ...prevData,
+      changeInput: true,
+      title: e.target.value,
+    }));
+  };
+
+  const handleChangeText = (e: any) => {
+    setNoteData((prevData) => ({
+      ...prevData,
+      changeInput: false,
+      title: prevData.title ? e.target.value : "Title",
+    }));
+  };
+
+  const postNotesData = async () => {
+    try {
+      const { title, label, noteText, editNote, selectedNote } = noteData;
+      const apiUrl = editNote ? `http://localhost:3001/notes/${selectedNote?.id}` : "http://localhost:3001/notes";
+
+      const response = await fetch(apiUrl, {
+        method: editNote ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          label: label.label,
+          color: label.color,
+          textData: noteText,
+          date: currDate,
+          creatBy: userFullName,
+        }),
+      });
+
+      if (response.ok) {
+        setNoteData((prevData) => ({
+          ...prevData,
+          showEditor: false,
+          editNote: false,
+          selectedNote: null,
+        }));
+      }
+
+      getNotesData();
+    } catch (error) {
+      console.error("Error adding/updating note", error);
+    }
+  };
+
+  const deleteNote = async (id: string) => {
+    const deleteResponse = await fetch(`http://localhost:3001/notes/${id}`, {
+      method: "DELETE",
+    });
+
+    if (deleteResponse.ok) {
+      const updatedNotes = noteData.notes.filter((note) => note.id !== id);
+      setNoteData((prevData) => ({
+        ...prevData,
+        notes: updatedNotes,
+        showEditor: !prevData.showEditor,
+      }));
+    }
+  };
+
+  const handleIconClick = () => {
+    const { selectedNote, showEditor } = noteData;
+
+    if (selectedNote) {
+      setNoteData((prevData) => ({
+        ...prevData,
+        label: { label: selectedNote?.label, color: selectedNote?.color },
+        title: selectedNote.title || "Title",
+        noteText: selectedNote.textData,
+        editNote: true,
+      }));
+    } else {
+      setNoteData((prevData) => ({ ...prevData, showEditor: !prevData.showEditor, editNote: false }));
+    }
+  };
+
+  const handleEditNote = (note: Notedata) => {
+    setNoteData((prevData) => ({ ...prevData, selectedNote: note }));
+    handleIconClick();
+  };
+
+  const deleteModal = (id: string) => {
+    setNoteData((prevData) => ({ ...prevData, noteId: id, deleteModal: true }));
+  };
+
+  return (
+    <>
+      <section>
+        <Container fluid>
+          <Row>
+            <Col className="note-haeder">
+              <Header getName={getName} />
+            </Col>
+          </Row>
+        </Container>
+      </section>
+      <section className="notes-dashboard">
+        <Container fluid>
+          <Row className="notes-content">
+            <Col className="col-lg-3 notes-content">
+              <Form.Group className="search-input">
+                <Form.Control
+                  type="text"
+                  name="search"
+                  value={noteData.searchNote}
+                  placeholder="Search notes"
+                  onChange={(e) => setNoteData((prevData) => ({ ...prevData, searchNote: e.target.value }))}
+                />
+                <FontAwesomeIcon icon={faMagnifyingGlass} className="search-icon" />
+              </Form.Group>
+              <div className="plus-icon">
+                <p>MY NOTES</p>
+                <span className="icon">
+                  <FontAwesomeIcon icon={faPlus} onClick={handleIconClick} />
+                </span>
+              </div>
+              <div className="notes">
+                {noteData.notes.map((note: Notedata) => (
+                  <Card key={note.id} className="notes-card" onClick={() => handleEditNote(note)}>
+                    {/* ... (remaining code for note card) ... */}
+                  </Card>
+                ))}
+                {noteData.notes.length === 0 && <h3 className="note-not-found">No notes found !!!</h3>}
+              </div>
+            </Col>
+            <Col className="col-lg-9 notes-editor">
+              {noteData.showEditor ? (
+                <div>
+                  <div className="note-title">
+                    {/* ... (remaining code for note title) ... */}
+                  </div>
+                  <div>
+                    <TextEditor setNoteText={(text) => setNoteData((prevData) => ({ ...prevData, noteText: text }))} noteText={noteData.noteText} />
+                  </div>
+                  <div className="note-save-btn">
+                    <Button onClick={postNotesData}>Save</Button>
+                  </div>
+                </div>
+              ) : (
+                noteData.notes.length === 0 ? (
+                  <div className="no-notes-msg">
+                    <h3>No notes available !!!</h3>
+                  </div>
+                ) : (
+                  <div className="no-notes-msg">
+                    <h3>Please select note !!!</h3>
+                  </div>
+                )
+              )}
+              <DeleteModal deleteNote={deleteNote} setDeleteModal={(value) => setNoteData((prevData) => ({ ...prevData, deleteModal: value }))} noteId={noteData.noteId} deleteModal={noteData.deleteModal} />
+            </Col>
+          </Row>
+        </Container>
+      </section>
+    </>
+  );
+};
+
+export default NotesDashboard;
+
+
+const handleEditNote = (note: Notedata) => {
+  setSelectedNote(note);
+  setLabel({ label: note.label, color: note.color });
+  setTitle(note.title || "Title");
+  setNoteText(note.textData);
+  seteditNote(true);
+};
+
+
+const postNotesData = async () => {
+  try {
+    if (editNote && selectedNote) {
+      const response = await fetch(`http://localhost:3001/notes/${selectedNote.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          label: label?.label,  // Use label directly from state
+          color: label?.color,  // Use color directly from state
+          textData: noteText,
+        }),
+      });
+      if (response.ok) {
+        setShowEditor(false);
+        seteditNote(false);
+        setSelectedNote(null);
+      }
+    } else {
+      // ...
+    }
+    getNotesData();
+  } catch (error) {
+    console.error("Error adding/updating note", error);
+  }
+};

@@ -1,0 +1,57 @@
+{
+  "users": [
+    {
+      "firstName": "Piyush",
+      "lastName": "Dudhat",
+      "email": "pd@gmail.com",
+      "password": "Piyush@123",
+      "role": "Admin",
+      "id": 1
+    },
+    {
+      "firstName": "Arjun",
+      "lastName": "Singh",
+      "email": "singharjun.u@gmail.com",
+      "password": "Singh@1234",
+      "id": 2
+    }
+  ],
+  "notes": [
+    {
+      "title": "Election Commision",
+      "label": "Politics",
+      "color": "#f39449",
+      "date": "31/01/2024",
+      "creatBy": "Arjun Singh",
+      "textData": "<p>If yo<strong>u want to set properties based on the values of othe</strong>r properties, then you either need to base them both on some external value (that is not a property itself) or run an initializer function after the object literal is defined that can set some properties based on the values of other properties.</p>",
+      "id": 2
+    },
+    {
+      "title": "surat gujarat",
+      "label": "Finance",
+      "color": "#49b0f3",
+      "date": "31/01/2024",
+      "creatBy": "Piyush Dudhat",
+      "textData": "<p>Whilst this can be done with react, be aware that using onClicks with divs (instead of Buttons or Anchors, and others which already have behaviours for click events) is bad practice and should be avoided whenever it can be.</p>",
+      "id": 3
+    },
+    {
+      "title": "Mahadeva",
+      "label": "Education",
+      "color": "#dd57e9",
+      "date": "01/02/2024",
+      "creatBy": "Arjun Singh",
+      "textData": "<p>The DOCX to HTML converter provides a REST API for converting the Microsoft Word files to HTML documents. The service generates HTML data and returns it to the API consumer, allowing it to display it in the browser or insi<strong>de a CKEditor 5 instance</strong>. It can be used to automate the conversion of Word files and allows for mass documents conversion with the omission of the editor.</p>",
+      "id": 4
+    },
+    {
+      "title": "Ae Halo",
+      "label": "Travelling",
+      "color": "green",
+      "date": "05/02/2024",
+      "creatBy": "Arjun Singh",
+      "textData": "<p>As mentioned in my prev<strong>ious post, I've been</strong> working on a blogging app. I started writing up some posts of my own to document the experience, but quickly realized that the post content was not only plain-looking, but hard to read and unorganized.</p>",
+      "id": 50
+    }
+  ]
+}
